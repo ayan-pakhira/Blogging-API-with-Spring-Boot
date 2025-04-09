@@ -15,27 +15,31 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+   // private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public Optional<User> saveEntry(User user){
-        userRepository.save(user);
-        return Optional.empty();
+    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+
+    public User saveEntry(User user){
+        user.setPassword(encoder.encode(user.getPassword()));
+        return userRepository.save(user);
+
     }
 
-    public void saveUserEntry(User user){
-        userRepository.save(user);
+    public User saveUserEntry(User user){
+        user.setPassword(encoder.encode(user.getPassword()));
+        return userRepository.save(user);
     }
 
 
 
     //to save the user and encrypted password in the database.
-    public Optional<User> saveUser(User user){
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(Arrays.asList());
-        userRepository.save(user);
-
-        return Optional.empty();
-    }
+//    public Optional<User> saveUser(User user){
+//        user.setPassword(passwordEncoder.encode(user.getPassword()));
+//        user.setRoles(Arrays.asList());
+//        userRepository.save(user);
+//
+//        return Optional.empty();
+//    }
 
     public List<User> getAll(){
         return userRepository.findAll();

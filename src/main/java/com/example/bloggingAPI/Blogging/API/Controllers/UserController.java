@@ -22,32 +22,15 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<?> createEntry(@RequestBody User user){
-        Optional<User> saved = userService.saveEntry(user);
+        User saved = userService.saveEntry(user);
 
-        if(saved.isEmpty()){
+        if(saved != null){
             return new ResponseEntity<User>(HttpStatus.CREATED);
         }
         return new ResponseEntity<User>(HttpStatus.BAD_REQUEST);
     }
-
-
-    @PutMapping
-    public ResponseEntity<?> updateUser(@RequestBody User user){
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userName = authentication.getName();
-
-        User userInDb = userService.findByUserName(userName);
-        if(userInDb != null){
-            userInDb.setUserName(user.getUserName());
-            userInDb.setPassword(user.getPassword());
-            userService.saveUser(user);
-        }
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
 
     @GetMapping("/")
     public ResponseEntity<List<User>> getAll(){
@@ -60,6 +43,24 @@ public class UserController {
 
         return new ResponseEntity<List<User>>(HttpStatus.BAD_REQUEST);
     }
+
+
+//    @PutMapping
+//    public ResponseEntity<?> updateUser(@RequestBody User user){
+//
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String userName = authentication.getName();
+//
+//        User userInDb = userService.findByUserName(userName);
+//        if(userInDb != null){
+//            userInDb.setUserName(user.getUserName());
+//            userInDb.setPassword(user.getPassword());
+//            userService.saveUser(user);
+//        }
+//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    }
+
+
 
 
     @GetMapping("/{userName}")
