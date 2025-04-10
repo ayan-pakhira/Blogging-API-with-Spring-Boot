@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLOutput;
 import java.util.*;
 
 @RestController
@@ -42,6 +43,12 @@ public class UserController {
         }
 
         return new ResponseEntity<List<User>>(HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestBody User user){
+
+        return userService.verify(user);
     }
 
 
@@ -90,12 +97,12 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteUser(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        userRepository.deleteByUserName(authentication.getName());
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+//    @DeleteMapping
+//    public ResponseEntity<?> deleteUser(){
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//        userRepository.deleteByUserName(authentication.getName());
+//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    }
 
 }

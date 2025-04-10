@@ -24,16 +24,16 @@ public class PostController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/{userName}")
-    public ResponseEntity<Post> createEntry(@RequestBody Post post, @PathVariable String userName){
-        Optional<Post> saved = postService.saveEntry(post, userName);
-
-        if(saved.isEmpty()){
-            return new ResponseEntity<Post>(HttpStatus.CREATED);
-        }
-
-        return new ResponseEntity<Post>(HttpStatus.BAD_REQUEST);
-    }
+//    @PostMapping("/{userName}")
+//    public ResponseEntity<Post> createEntry(@RequestBody Post post, @PathVariable String userName){
+//        Optional<Post> saved = postService.saveEntry(post, userName);
+//
+//        if(saved.isEmpty()){
+//            return new ResponseEntity<Post>(HttpStatus.CREATED);
+//        }
+//
+//        return new ResponseEntity<Post>(HttpStatus.BAD_REQUEST);
+//    }
 
     @GetMapping("/")
     public List<Post> getAllPost(){
@@ -122,12 +122,12 @@ public class PostController {
         return true;
     }
 
-    @DeleteMapping("/id/{userName}/{id}")
-    public ResponseEntity<?> deletePostById(@PathVariable ObjectId id, @PathVariable String userName){
-        postService.deleteById(id, userName);
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+//    @DeleteMapping("/id/{userName}/{id}")
+//    public ResponseEntity<?> deletePostById(@PathVariable ObjectId id, @PathVariable String userName){
+//        postService.deleteById(id, userName);
+//
+//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    }
 
 
 }

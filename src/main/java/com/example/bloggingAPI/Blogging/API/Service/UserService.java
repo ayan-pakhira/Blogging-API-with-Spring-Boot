@@ -3,6 +3,9 @@ package com.example.bloggingAPI.Blogging.API.Service;
 import com.example.bloggingAPI.Blogging.API.Entity.User;
 import com.example.bloggingAPI.Blogging.API.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -15,7 +18,13 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-   // private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private AuthenticationManager authManager;
+
+    @Autowired
+    private JWTService jwtService;
+
+    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
@@ -30,6 +39,15 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // to verify the user while logging in.
+    public String verify(User user){
+        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword()));
+
+        if(authentication.isAuthenticated()){
+            return jwtService.generateToken(user.getUserName());
+        }
+        return "Fail";
+    }
 
 
     //to save the user and encrypted password in the database.
