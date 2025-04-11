@@ -18,14 +18,14 @@ public class PostService {
     @Autowired
     private UserService userService;
 
-//    public Optional<Post> saveEntry(Post post, String userName){
-//        User user = userService.findByUserName(userName);
-//        Post saveInput = postRepository.save(post);
-//        user.getAllPosts().add(saveInput);
-//        userService.saveEntry(user);
-//
-//        return Optional.empty();
-//    }
+    public Optional<Post> saveEntry(Post post, String userName){
+        User user = userService.findByUserName(userName);
+        Post saveInput = postRepository.save(post);
+        user.getAllPosts().add(saveInput);
+        userService.saveEntry(user);
+
+        return Optional.empty();
+    }
 
     public void saveUserEntry(Post post){
         postRepository.save(post);
@@ -44,13 +44,13 @@ public class PostService {
    }
 
 
-//   public void deleteById(ObjectId id, String userName){
-//        User user = userService.findByUserName(userName);
-//        user.getAllPosts().removeIf(x -> x.getId().equals(id));
-//
-//        userService.saveEntry(user);
-//        postRepository.deleteById(id);
-//   }
+   public void deleteById(ObjectId id, String userName){
+        User user = userService.findByUserName(userName);
+        user.getAllPosts().removeIf(x -> x.getId().equals(id));
+
+        userService.saveEntry(user);
+        postRepository.deleteById(id);
+   }
 
    public void delete(){
         postRepository.deleteAll();

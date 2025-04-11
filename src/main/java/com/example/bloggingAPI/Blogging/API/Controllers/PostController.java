@@ -8,6 +8,8 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -24,16 +26,18 @@ public class PostController {
     @Autowired
     private UserService userService;
 
-//    @PostMapping("/{userName}")
-//    public ResponseEntity<Post> createEntry(@RequestBody Post post, @PathVariable String userName){
-//        Optional<Post> saved = postService.saveEntry(post, userName);
-//
-//        if(saved.isEmpty()){
-//            return new ResponseEntity<Post>(HttpStatus.CREATED);
-//        }
-//
-//        return new ResponseEntity<Post>(HttpStatus.BAD_REQUEST);
-//    }
+    @PostMapping
+    public ResponseEntity<Post> createEntry(@RequestBody Post post){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        Optional<Post> saved = postService.saveEntry(post, userName);
+
+        if(saved.isEmpty()){
+            return new ResponseEntity<Post>(HttpStatus.CREATED);
+        }
+
+        return new ResponseEntity<Post>(HttpStatus.BAD_REQUEST);
+    }
 
     @GetMapping("/")
     public List<Post> getAllPost(){
@@ -46,8 +50,12 @@ public class PostController {
     }
 
 
-    @GetMapping("/1/{userName}")
-    public ResponseEntity<?> getPostByUserName(@PathVariable String userName){
+    @GetMapping
+    public ResponseEntity<?> getPostByUserName(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        //fetching the username from the authentication itself, means for authorization purpose when we will
+        //enter username and password, from there we will fetch the username through this process
+        String userName = authentication.getName();
         User user = userService.findByUserName(userName);
 
         if(user == null){
@@ -56,10 +64,11 @@ public class PostController {
 
         List<Post> all = user.getAllPosts();
 
-        if(all != null && !all.isEmpty()){
-            return new ResponseEntity<>(all, HttpStatus.OK);
-        }
+        if(userName.equals(user)){
 
+                return new ResponseEntity<>(all, HttpStatus.OK);
+
+        }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
@@ -122,12 +131,12 @@ public class PostController {
         return true;
     }
 
-//    @DeleteMapping("/id/{userName}/{id}")
-//    public ResponseEntity<?> deletePostById(@PathVariable ObjectId id, @PathVariable String userName){
-//        postService.deleteById(id, userName);
-//
-//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//    }
+    @DeleteMapping("/id/{userName}/{id}")
+    public ResponseEntity<?> deletePostById(@PathVariable ObjectId id, @PathVariable String userName){
+        postService.deleteById(id, userName);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
 
 }

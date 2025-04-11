@@ -1,5 +1,6 @@
 package com.example.bloggingAPI.Blogging.API.Controllers;
 import com.example.bloggingAPI.Blogging.API.Entity.User;
+import com.example.bloggingAPI.Blogging.API.Models.UserPrincipal;
 import com.example.bloggingAPI.Blogging.API.Repository.UserRepository;
 import com.example.bloggingAPI.Blogging.API.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,9 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping("/")
+
+
+    @PostMapping("/auth/register")
     public ResponseEntity<?> createEntry(@RequestBody User user){
         User saved = userService.saveEntry(user);
 
@@ -45,11 +48,11 @@ public class UserController {
         return new ResponseEntity<List<User>>(HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/login")
-    public String login(@RequestBody User user){
-
-        return userService.verify(user);
-    }
+//    @PostMapping("/login")
+//    public String login(@RequestBody User user){
+//
+//        return userService.verify(user);
+//    }
 
 
 //    @PutMapping
@@ -71,8 +74,22 @@ public class UserController {
 
 
     @GetMapping("/{userName}")
-    public ResponseEntity<?> getUserByUserName(@PathVariable String userName){
+    public ResponseEntity<?> getUserByUserName(@PathVariable String userName, Authentication authentication){
+
+        //with the help of this endpoint and using this method, we will be able to extract data from
+        //database by using their respective username and password otherwise it will lead to unauthorized access error.
+
+        //************important while working with this type of problem***********//
+        // do not inject UserPrincipal directly which can leads to error like "this.user = user" is null.
+
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+       if(!userPrincipal.getUsername().equals(userName)){
+           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access denied");
+       }
+
         User users = userService.findByUserName(userName);
+
 
         if(users != null){
             return new ResponseEntity<User> (users, HttpStatus.OK);

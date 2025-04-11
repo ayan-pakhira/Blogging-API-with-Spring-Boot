@@ -29,7 +29,7 @@ public class CommentsController {
     private UserService userService;
 
 
-    @PostMapping("/{userName}/{title}")
+    @PostMapping("/create-comments/{userName}/{title}")
     public ResponseEntity<?> createComments(@RequestBody Comments comments, @PathVariable String userName, @PathVariable String title){
 
         Optional<Comments> saved = commentService.saveEntry(comments, userName, title);

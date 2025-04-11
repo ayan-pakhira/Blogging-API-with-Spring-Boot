@@ -31,11 +31,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         return http.csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/user/**", "/public/**").permitAll()
+                        .requestMatchers("/user/auth/**", "/public/create-user/**", "/post/create-post/**", "/comments/create-comments/**").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                
                 .build();
     }
 

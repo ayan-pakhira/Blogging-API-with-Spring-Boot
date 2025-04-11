@@ -21,8 +21,8 @@ public class UserService {
     @Autowired
     private AuthenticationManager authManager;
 
-    @Autowired
-    private JWTService jwtService;
+//    @Autowired
+//    private JWTService jwtService;
 
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -40,14 +40,14 @@ public class UserService {
     }
 
     // to verify the user while logging in.
-    public String verify(User user){
-        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword()));
-
-        if(authentication.isAuthenticated()){
-            return jwtService.generateToken(user.getUserName());
-        }
-        return "Fail";
-    }
+//    public String verify(User user){
+//        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword()));
+//
+//        if(authentication.isAuthenticated()){
+//            return jwtService.generateToken(user.getUserName());
+//        }
+//        return "Fail";
+//    }
 
 
     //to save the user and encrypted password in the database.

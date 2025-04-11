@@ -24,7 +24,7 @@ public class CommentService {
 
     public Optional<Comments> saveEntry(Comments comments, String userName, String title){
         User user = userService.findByUserName(userName);
-        Post post = postService.getPostByTitle(title);
+        Post post = postService.getPostByTitle(title); //need to replace this with the slug of the title.
 
         if(user == null || post == null){
             return Optional.empty();
@@ -37,6 +37,59 @@ public class CommentService {
         return Optional.of(saveComment);
 
     }
+
+    public List<Comments> getAllComments(){
+        return commentRepository.findAll();
+    }
+
+    public Optional<Post> getCommentsByUserName(String userName, String title) {
+        User user = userService.findByUserName(userName);
+        Post comments = null;
+        if (user.getUserName().equals(userName)) {
+            comments = postService.getPostByTitle(title);
+        }
+        assert comments != null;
+        //a basic assertion in Java used to ensure that the comments object is not null at runtime.
+        //If comments is null, it will throw an AssertionError and stop the program (if assertions are enabled).
+        return Optional.of(comments);
+    }
+
+    //alternative1 of the getCommentsByUserName code.
+    public Optional<Post> getPostByUserAndTitle(String userName, String title) {
+        User user = userService.findByUserName(userName);
+
+        if (user == null) {
+            return Optional.empty();
+        }
+
+        Post post = postService.getPostByTitle(title);
+
+        if (post == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(post);
+    }
+
+
+    //alternative 2 of the getCommentByUserName code.
+    public Optional<List<Comments>> getCommentsByUserAndTitle(String userName, String title) {
+        User user = userService.findByUserName(userName);
+
+        if (user == null) {
+            return Optional.empty();
+        }
+
+        Post post = postService.getPostByTitle(title);
+
+        if (post == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(post.getAllComments());
+    }
+
+
 
     public void delete(){
         commentRepository.deleteAll();
