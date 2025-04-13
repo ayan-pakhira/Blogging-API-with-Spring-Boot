@@ -7,29 +7,39 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class UserPrincipal implements UserDetails {
 
-    private final User user;
+    //private final User user;
+
+    private final String userName;
+    private final String password;
+    private final List<SimpleGrantedAuthority> authorities;
 
     public UserPrincipal(User user) {
-        this.user = user;
+        this.userName = user.getUserName();
+        this.password = user.getPassword();
+        this.authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .toList();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // You can modify this to return dynamic roles if needed.
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        return authorities;
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return user.getUserName();
+        return userName;
     }
 
     @Override

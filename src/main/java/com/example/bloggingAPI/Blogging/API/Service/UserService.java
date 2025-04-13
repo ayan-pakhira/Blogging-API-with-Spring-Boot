@@ -3,6 +3,8 @@ package com.example.bloggingAPI.Blogging.API.Service;
 import com.example.bloggingAPI.Blogging.API.Entity.User;
 import com.example.bloggingAPI.Blogging.API.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,15 +30,31 @@ public class UserService {
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
+    //registering as an user
     public User saveEntry(User user){
+
+        User user1 = userRepository.findByUserName(user.getUserName());
+
         user.setPassword(encoder.encode(user.getPassword()));
+        user.setRoles(Arrays.asList("USER"));
         return userRepository.save(user);
 
     }
 
+    //for public controller
     public User saveUserEntry(User user){
         user.setPassword(encoder.encode(user.getPassword()));
         return userRepository.save(user);
+    }
+
+    //for registering as an admin
+    public User saveAdminUser(String userName, String password){
+        User admin = new User();
+
+        admin.setPassword(encoder.encode(password));
+        admin.setUserName(userName);
+        admin.setRoles(Arrays.asList("ADMIN", "USER"));
+        return userRepository.save(admin);
     }
 
     // to verify the user while logging in.

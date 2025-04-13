@@ -30,12 +30,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         return http.csrf(customizer -> customizer.disable())
+
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/user/auth/**", "/public/create-user/**", "/post/create-post/**", "/comments/create-comments/**").permitAll()
+
+                        // User registration endpoint is public
+                        .requestMatchers("/user/auth/**").permitAll()
+                        .requestMatchers("/auth/api/**").permitAll() //for login and logout
+
+                        // Admin endpoint is public, but role can be checked *after* authentication (if needed inside controller)
+                        .requestMatchers("/admin/auth/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/api/**").hasRole("ADMIN") //to fetch all the users.
+
+                        // Reader/Visitor endpoints that are truly public
+                        .requestMatchers("/post/name/**").permitAll()
+                        .requestMatchers("/public/all-post/**").permitAll()
                         .anyRequest().authenticated())
+
+
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 
                 .build();
     }

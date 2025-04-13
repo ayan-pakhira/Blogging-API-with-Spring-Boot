@@ -1,6 +1,8 @@
 package com.example.bloggingAPI.Blogging.API.Controllers;
 
+import com.example.bloggingAPI.Blogging.API.Entity.Post;
 import com.example.bloggingAPI.Blogging.API.Entity.User;
+import com.example.bloggingAPI.Blogging.API.Service.PostService;
 import com.example.bloggingAPI.Blogging.API.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,12 @@ public class PublicController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private PostService postService;
+
+    //controllers to make:
+    //post can be fetched by title
+
 
     @PostMapping("/create-user/")
     public boolean createNewEntry(@RequestBody User user){
@@ -26,17 +34,16 @@ public class PublicController {
         return true;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<List<User>> getAll(){
-
-        List<User> all = userService.getAll();
-
-        if(all != null){
-            return new ResponseEntity<List<User>>(all, HttpStatus.OK);
+    //to only read the post without login.
+    @GetMapping("/all-post")
+    public ResponseEntity<List<Post>> getAllValue(){
+        List<Post> all = postService.getAll();
+        if(all != null && !all.isEmpty()){
+            return new ResponseEntity<>(all, HttpStatus.OK);
         }
-
-        return new ResponseEntity<List<User>>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
 
     @GetMapping("/csrf-token")
     public CsrfToken csrfTokenValue(HttpServletRequest request){

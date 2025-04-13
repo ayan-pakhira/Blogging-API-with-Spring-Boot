@@ -6,6 +6,7 @@ import com.example.bloggingAPI.Blogging.API.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +27,7 @@ public class UserController {
 
 
 
+    //for registering the user
     @PostMapping("/auth/register")
     public ResponseEntity<?> createEntry(@RequestBody User user){
         User saved = userService.saveEntry(user);
@@ -36,17 +38,6 @@ public class UserController {
         return new ResponseEntity<User>(HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping("/")
-    public ResponseEntity<List<User>> getAll(){
-
-        List<User> all = userService.getAll();
-
-        if(all != null){
-            return new ResponseEntity<List<User>>(all, HttpStatus.OK);
-        }
-
-        return new ResponseEntity<List<User>>(HttpStatus.BAD_REQUEST);
-    }
 
 //    @PostMapping("/login")
 //    public String login(@RequestBody User user){
@@ -55,20 +46,21 @@ public class UserController {
 //    }
 
 
-//    @PutMapping
-//    public ResponseEntity<?> updateUser(@RequestBody User user){
-//
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String userName = authentication.getName();
-//
-//        User userInDb = userService.findByUserName(userName);
-//        if(userInDb != null){
-//            userInDb.setUserName(user.getUserName());
-//            userInDb.setPassword(user.getPassword());
-//            userService.saveUser(user);
-//        }
-//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//    }
+    @PreAuthorize(("hasRole('ADMIN'), ('USER')"))
+    @PutMapping
+    public ResponseEntity<?> updateUser(@RequestBody User user){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+
+        User userInDb = userService.findByUserName(userName);
+        if(userInDb != null){
+            userInDb.setUserName(user.getUserName());
+            userInDb.setPassword(user.getPassword());
+            userService.saveEntry(user);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
 
 
