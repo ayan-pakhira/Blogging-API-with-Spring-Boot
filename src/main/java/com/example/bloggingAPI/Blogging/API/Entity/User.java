@@ -26,6 +26,9 @@ public class User {
     @NonNull
     private String password;
 
+    @NonNull
+    private String email;
+
     @DBRef
     private List<Post> allPosts = new ArrayList<>();
 
