@@ -23,8 +23,7 @@ public class UserService {
     @Autowired
     private AuthenticationManager authManager;
 
-//    @Autowired
-//    private JWTService jwtService;
+
 
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -48,34 +47,16 @@ public class UserService {
     }
 
     //for registering as an admin
-    public User saveAdminUser(String userName, String password){
+    public User saveAdminUser(String userName, String password, String email){
         User admin = new User();
 
         admin.setPassword(encoder.encode(password));
         admin.setUserName(userName);
+        admin.setEmail(email);
         admin.setRoles(Arrays.asList("ADMIN", "USER"));
         return userRepository.save(admin);
     }
 
-    // to verify the user while logging in.
-//    public String verify(User user){
-//        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword()));
-//
-//        if(authentication.isAuthenticated()){
-//            return jwtService.generateToken(user.getUserName());
-//        }
-//        return "Fail";
-//    }
-
-
-    //to save the user and encrypted password in the database.
-//    public Optional<User> saveUser(User user){
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
-//        user.setRoles(Arrays.asList());
-//        userRepository.save(user);
-//
-//        return Optional.empty();
-//    }
 
     public List<User> getAll(){
         return userRepository.findAll();

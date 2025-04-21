@@ -39,13 +39,7 @@ public class UserController {
     }
 
 
-//    @PostMapping("/login")
-//    public String login(@RequestBody User user){
-//
-//        return userService.verify(user);
-//    }
-
-
+    //edit the user details
     @PreAuthorize(("hasRole('ADMIN'), ('USER')"))
     @PutMapping
     public ResponseEntity<?> updateUser(@RequestBody User user){
@@ -63,8 +57,7 @@ public class UserController {
     }
 
 
-
-
+    //read the user details by username
     @GetMapping("/{userName}")
     public ResponseEntity<?> getUserByUserName(@PathVariable String userName, Authentication authentication){
 
@@ -90,12 +83,14 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    //delete all users at a time
     @DeleteMapping("/")
     public boolean deleteAllUsers(){
         userService.deleteAll();
         return true;
     }
 
+    //delete any user individually by username.
     @DeleteMapping("/{userName}")
     public ResponseEntity<?> deletedByUserName(@PathVariable String userName){
         Optional<User> deleted = userService.deleteByUserName(userName);
@@ -106,12 +101,6 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-//    @DeleteMapping
-//    public ResponseEntity<?> deleteUser(){
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//
-//        userRepository.deleteByUserName(authentication.getName());
-//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//    }
+
 
 }
