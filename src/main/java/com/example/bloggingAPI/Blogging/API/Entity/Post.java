@@ -26,6 +26,8 @@ public class Post {
     @NonNull
     private String content;
 
+    private ObjectId userId;
+
     @DBRef
     private List<Comments> allComments = new ArrayList<>();
 

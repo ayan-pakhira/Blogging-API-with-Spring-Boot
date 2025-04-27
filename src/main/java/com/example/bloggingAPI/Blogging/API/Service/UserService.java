@@ -42,7 +42,6 @@ public class UserService {
 
     //for public controller
     public User saveUserEntry(User user){
-        user.setPassword(encoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -53,7 +52,7 @@ public class UserService {
         admin.setPassword(encoder.encode(password));
         admin.setUserName(userName);
         admin.setEmail(email);
-        admin.setRoles(Arrays.asList("ADMIN", "USER"));
+        admin.setRoles(Arrays.asList("USER", "ADMIN"));
         return userRepository.save(admin);
     }
 

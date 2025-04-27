@@ -25,11 +25,14 @@ public class PostService {
     //to create post for the logged in user
     public Optional<Post> saveEntry(Post post, String userName){
         User user = userService.findByUserName(userName);
+        post.setUserId(user.getId());
+
         Post saveInput = postRepository.save(post);
         user.getAllPosts().add(saveInput);
         userService.saveEntry(user);
+        postRepository.save(saveInput);
 
-        return Optional.empty();
+        return Optional.of(saveInput);
     }
 
     public void saveUserEntry(Post post){
@@ -83,9 +86,13 @@ public class PostService {
         postRepository.deleteAll();
    }
 
-   //need to figure it out this one also
-   public void deleteByTitle(String title){
+
+   //delete post by title
+   public void deleteByTitle(String title, String userName){
         Post toDelete = postRepository.findByTitle(title);
+        User user = userRepository.findByUserName(userName);
+        user.getAllPosts().removeIf(x -> x.getTitle().equals(title));
+        userService.saveEntry(user);
         postRepository.delete(toDelete);
    }
 }

@@ -41,6 +41,7 @@ public class SecurityConfig {
 
                         // User registration endpoint is public
                         .requestMatchers("/user/auth/**").permitAll()
+                        .requestMatchers("/user/").permitAll()
                         .requestMatchers("/auth/api/**").permitAll() //for login and logout
 
                         .requestMatchers("/admin/auth/**").hasRole("ADMIN")

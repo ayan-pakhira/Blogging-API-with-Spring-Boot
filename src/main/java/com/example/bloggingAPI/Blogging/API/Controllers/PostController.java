@@ -2,12 +2,15 @@ package com.example.bloggingAPI.Blogging.API.Controllers;
 
 import com.example.bloggingAPI.Blogging.API.Entity.Post;
 import com.example.bloggingAPI.Blogging.API.Entity.User;
+import com.example.bloggingAPI.Blogging.API.Repository.PostRepository;
+import com.example.bloggingAPI.Blogging.API.Repository.UserRepository;
 import com.example.bloggingAPI.Blogging.API.Service.PostService;
 import com.example.bloggingAPI.Blogging.API.Service.UserService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -26,30 +29,28 @@ public class PostController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PostRepository postRepository;
+
+
     //creating the posts only for logged in users.
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @PostMapping("/name/create-post")
     public ResponseEntity<Post> createEntry(@RequestBody Post post){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
         Optional<Post> saved = postService.saveEntry(post, userName);
 
-        if(saved.isEmpty()){
+        if(saved.isPresent()){
             return new ResponseEntity<Post>(HttpStatus.CREATED);
         }
 
         return new ResponseEntity<Post>(HttpStatus.BAD_REQUEST);
     }
 
-    //this is public, available for everyone
-    @GetMapping("/")
-    public List<Post> getAllPost(){
-        return postService.getAll();
-    }
-
-    @GetMapping("/id/{title}")
-    public Post getPostByTitle(@PathVariable String title){
-        return postService.getPostByTitle(title);
-    }
 
 
     //only for logged in users.
@@ -119,18 +120,20 @@ public class PostController {
 //    }
 
 
-    //updating the post for logged in users.
-    @PutMapping("/name/{id}")
-    public ResponseEntity<?> updatePost(
-            @PathVariable ObjectId id,
-            @RequestBody Post post,
-            Authentication auth
-    ){
-        String userName = auth.getName();
-        postService.updatePost(id, post, userName);
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PutMapping("/name/update-post/{title}")
+   public ResponseEntity<?> updatePost(@PathVariable String title, @RequestBody Post post) {
 
-        return ResponseEntity.ok("Updated");
-    }
+        Post postInDb = postRepository.findByTitle(title);
+        if(postInDb != null){
+            postInDb.setTitle(post.getTitle());
+            postInDb.setContent(post.getContent());
+            postService.saveUserEntry(post);
+            return ResponseEntity.ok("updated the post");
+        }
+
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+   }
 
 
     //deleting the post for logged in users.
@@ -154,9 +157,12 @@ public class PostController {
         return true;
     }
 
-    @DeleteMapping("/{title}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @DeleteMapping("/name/delete-post/{title}")
     public boolean deletePostByTitle(@PathVariable String title){
-        postService.deleteByTitle(title);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String userName = auth.getName();
+        postService.deleteByTitle(title, userName);
 
         return true;
     }

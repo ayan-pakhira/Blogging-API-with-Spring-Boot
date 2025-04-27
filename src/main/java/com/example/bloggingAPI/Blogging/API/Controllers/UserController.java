@@ -51,6 +51,7 @@ public class UserController {
         if(userInDb != null){
             userInDb.setUserName(user.getUserName());
             userInDb.setPassword(user.getPassword());
+            userInDb.setRoles(Arrays.asList("USER"));
             userService.saveEntry(user);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

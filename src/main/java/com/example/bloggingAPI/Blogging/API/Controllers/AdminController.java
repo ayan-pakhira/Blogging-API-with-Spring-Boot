@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -62,7 +63,8 @@ public class AdminController {
             adminUser.setUserName(dto.getUserName());
             adminUser.setPassword(encoder.encode(dto.getPassword()));
             adminUser.setEmail(dto.getEmail());
-            userService.saveEntry(adminUser);
+            adminUser.setRoles(Arrays.asList("USER", "ADMIN"));
+            userService.saveUserEntry(adminUser);
             return ResponseEntity.ok("Updated user details");
         }
 
