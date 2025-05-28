@@ -41,13 +41,14 @@ public class SecurityConfig {
 
                         // User registration endpoint is public
                         .requestMatchers("/user/auth/**").permitAll()
-                        .requestMatchers("/user/").permitAll()
+                        .requestMatchers("/user/**").permitAll()
                         .requestMatchers("/auth/api/**").permitAll() //for login and logout
 
                         .requestMatchers("/admin/auth/**").hasRole("ADMIN")
                         .requestMatchers("/admin/api/**").hasRole("ADMIN") //to fetch all the users.
 
                         .requestMatchers("/post/name/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/post/**").permitAll()
                         .requestMatchers("/public/all-post/**").permitAll()
                         .anyRequest().authenticated())
 
