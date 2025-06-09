@@ -37,11 +37,8 @@ public class PostController {
 
 
     //creating the posts only for logged in users.
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    @PostMapping("/name/create-post")
-    public ResponseEntity<Post> createEntry(@RequestBody Post post){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userName = authentication.getName();
+    @PostMapping("/name/create-post/{userName}")
+    public ResponseEntity<Post> createEntry(@RequestBody Post post, @PathVariable String userName){
         Optional<Post> saved = postService.saveEntry(post, userName);
 
         if(saved.isPresent()){
