@@ -1,8 +1,11 @@
 package com.example.bloggingAPI.Blogging.API.Controllers;
 
 import com.example.bloggingAPI.Blogging.API.Models.UserDTO;
+import com.example.bloggingAPI.Blogging.API.Service.CustomUserDetailsService;
+import com.example.bloggingAPI.Blogging.API.Utils.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.AuthenticationException;
@@ -17,34 +21,42 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/auth")
+@Slf4j
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private AuthenticationManager auth;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
+
+
+
+
 
 
     @PostMapping("/api/login")
-    public ResponseEntity<?> loginPage(@RequestBody UserDTO request, HttpServletRequest httpRequest){
+    public ResponseEntity<?> loginUser(@RequestBody UserDTO user){
+
         try{
+            auth.authenticate(new UsernamePasswordAuthenticationToken
+                    (user.getUserName(), user.getPassword()));
 
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUserName(), request.getPassword())
-            );
+            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUserName());
+            String jwt = jwtUtil.generateToken(userDetails.getUsername());
+            return new ResponseEntity<>(jwt, HttpStatus.OK);
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
-            HttpSession session = httpRequest.getSession(true);
-            return ResponseEntity.ok(Map.of(
-                    "message", "Login Successful",
-                    "sessionId", session.getId()
-            ));
-
-        }catch(Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
-                    "error",
-                    "Invalid Username and Password"
-            ));
+        } catch (Exception e) {
+            log.error("Exception occurred while createAuthenticationToken ", e);
+            return new ResponseEntity<>("incorrect username or password", HttpStatus.BAD_REQUEST);
         }
     }
+
+
+
 
     @PostMapping("/api/logout")
     public ResponseEntity<?> logoutPage(HttpServletRequest httpRequest){

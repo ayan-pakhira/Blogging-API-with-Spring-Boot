@@ -1,6 +1,7 @@
 package com.example.bloggingAPI.Blogging.API.Config;
 
 //import com.example.bloggingAPI.Blogging.API.Service.UserDetailServiceImpl;
+import com.example.bloggingAPI.Blogging.API.Filter.JwtFilter;
 import com.example.bloggingAPI.Blogging.API.Service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -31,6 +33,9 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customService;
+
+    @Autowired
+    private JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
@@ -48,14 +53,14 @@ public class SecurityConfig {
                         .requestMatchers("/admin/api/**").hasRole("ADMIN") //to fetch all the users.
 
                         .requestMatchers("/post/name/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/post/**").permitAll()
                         .requestMatchers("/public/all-post/**").permitAll()
                         .anyRequest().authenticated())
 
 
-                .formLogin(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults())
+
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
