@@ -20,13 +20,13 @@ public class User {
     private ObjectId id;
 
     @NonNull
-    @Indexed(unique = true)
     private String userName;
 
     @NonNull
     private String password;
 
     @NonNull
+    @Indexed(unique = true)
     private String email;
 
     @DBRef

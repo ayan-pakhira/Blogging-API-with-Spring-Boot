@@ -11,10 +11,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Component
+@Service
 public class UserService {
 
     @Autowired
@@ -31,8 +33,6 @@ public class UserService {
 
     //registering as an user
     public User saveEntry(User user){
-
-        User user1 = userRepository.findByUserName(user.getUserName());
 
         user.setPassword(encoder.encode(user.getPassword()));
         user.setRoles(Arrays.asList("USER"));
@@ -63,7 +63,12 @@ public class UserService {
 
 
     public User findByUserName(String userName){
-        return userRepository.findByUserName(userName);
+        User users =  userRepository.findByUserName(userName);
+        return null;
+    }
+
+    public List<User> getByUserName(String userName){
+        return userRepository.findByUserNameContainingIgnoreCase(userName);
     }
 
     public void deleteAll(){

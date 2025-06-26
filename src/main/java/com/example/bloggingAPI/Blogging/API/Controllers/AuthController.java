@@ -34,18 +34,14 @@ public class AuthController {
     private CustomUserDetailsService userDetailsService;
 
 
-
-
-
-
     @PostMapping("/api/login")
     public ResponseEntity<?> loginUser(@RequestBody UserDTO user){
 
         try{
             auth.authenticate(new UsernamePasswordAuthenticationToken
-                    (user.getUserName(), user.getPassword()));
+                    (user.getEmail(), user.getPassword()));
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUserName());
+            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
             String jwt = jwtUtil.generateToken(userDetails.getUsername());
             return new ResponseEntity<>(jwt, HttpStatus.OK);
 

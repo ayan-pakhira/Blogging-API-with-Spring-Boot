@@ -14,12 +14,12 @@ public class UserPrincipal implements UserDetails {
 
     //private final User user;
 
-    private final String userName;
+    private final String email;
     private final String password;
     private final List<SimpleGrantedAuthority> authorities;
 
     public UserPrincipal(User user) {
-        this.userName = user.getUserName();
+        this.email = user.getEmail();
         this.password = user.getPassword();
         this.authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
@@ -39,7 +39,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return userName;
+        return email;
     }
 
     @Override

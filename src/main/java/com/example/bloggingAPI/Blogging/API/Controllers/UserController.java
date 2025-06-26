@@ -58,34 +58,25 @@ public class UserController {
     }
 
 
-    //read the user details by username
-    @GetMapping("/{userName}")
-    public ResponseEntity<?> getUserByUserName(@PathVariable String userName, Authentication authentication){
+    //endpoints of search api where we can search for an user by their username.
+    @GetMapping("/search/{userName}")
+    public ResponseEntity<?> getUserByUserName(@PathVariable String userName){
 
-        //with the help of this endpoint and using this method, we will be able to extract data from
-        //database by using their respective username and password otherwise it will lead to unauthorized access error.
+       List<User> users =  userService.getByUserName(userName);
 
-        //************important while working with this type of problem***********//
-        // do not inject UserPrincipal directly which can leads to error like "this.user = user" is null.
-
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-
-       if(!userPrincipal.getUsername().equals(userName)){
-           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access denied");
-       }
-
-        User users = userService.findByUserName(userName);
 
 
         if(users != null){
-            return new ResponseEntity<User> (users, HttpStatus.OK);
+            return new ResponseEntity<> (users, HttpStatus.OK);
         }
 
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+
+
     //delete all users at a time
-    @DeleteMapping("/")
+    @DeleteMapping("/auth/delete-all")
     public boolean deleteAllUsers(){
         userService.deleteAll();
         return true;
