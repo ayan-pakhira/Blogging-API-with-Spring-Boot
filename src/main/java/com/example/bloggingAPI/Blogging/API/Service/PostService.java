@@ -6,6 +6,7 @@ import com.example.bloggingAPI.Blogging.API.Repository.PostRepository;
 import com.example.bloggingAPI.Blogging.API.Repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -23,8 +24,8 @@ public class PostService {
     private UserRepository userRepository;
 
     //to create post for the logged in user
-    public Optional<Post> saveEntry(Post post, String userName){
-        User user = userService.findByUserName(userName);
+    public Optional<Post> saveEntry(Post post, String email){
+       User user = userRepository.findByEmail(email);
         post.setUserId(user.getId());
 
         Post saveInput = postRepository.save(post);
@@ -54,9 +55,10 @@ public class PostService {
    }
 
 
-   //update the post for the logged in users.
+   //update the post for the logged-in users.
    public Post updatePost(ObjectId postId, Post updatedPost, String userName){
-        Optional<Post> post = Optional.ofNullable(postRepository.findById(postId).orElseThrow(() -> new RuntimeException("post not found")));
+        Optional<Post> post = Optional.ofNullable(postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("post not found")));
 
         if(!userRepository.existsByUserName(userName)){
             throw new RuntimeException("unauthorized to update the post");
@@ -70,7 +72,10 @@ public class PostService {
    }
 
 
-   //delete the post only available for logged in users.
+   //finding the post by email
+
+
+   //delete the post only available for logged-in users.
    public void deleteById(ObjectId id, String userName){
         Optional<Post> post = Optional.ofNullable(postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found")));

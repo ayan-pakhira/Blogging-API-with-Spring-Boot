@@ -1,6 +1,7 @@
 package com.example.bloggingAPI.Blogging.API.Service;
 
 import com.example.bloggingAPI.Blogging.API.Entity.User;
+import com.example.bloggingAPI.Blogging.API.Repository.PostRepository;
 import com.example.bloggingAPI.Blogging.API.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,9 @@ public class UserService {
 
     @Autowired
     private AuthenticationManager authManager;
+
+    @Autowired
+    private PostRepository postRepository;
 
 
 
@@ -67,9 +71,14 @@ public class UserService {
         return null;
     }
 
+    //for search api
     public List<User> getByUserName(String userName){
         return userRepository.findByUserNameContainingIgnoreCase(userName);
     }
+
+
+
+
 
     public void deleteAll(){
         userRepository.deleteAll();

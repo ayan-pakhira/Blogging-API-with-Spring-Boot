@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/post/name/**").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/post/**").permitAll()
                         .requestMatchers("/public/all-post/**").permitAll()
+                        .requestMatchers("/notification/**").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated())
 
 
@@ -69,8 +70,6 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-
-        provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
         provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
         provider.setUserDetailsService(customService);
         return provider;

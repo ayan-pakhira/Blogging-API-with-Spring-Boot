@@ -1,7 +1,9 @@
 package com.example.bloggingAPI.Blogging.API.Controllers;
 import com.example.bloggingAPI.Blogging.API.Entity.User;
 import com.example.bloggingAPI.Blogging.API.Models.UserPrincipal;
+import com.example.bloggingAPI.Blogging.API.Repository.PostRepository;
 import com.example.bloggingAPI.Blogging.API.Repository.UserRepository;
+import com.example.bloggingAPI.Blogging.API.Service.PostService;
 import com.example.bloggingAPI.Blogging.API.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,13 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+
+    @Autowired
+    private PostService postService;
+
+    @Autowired
+    private PostRepository postRepository;
 
 
 
@@ -82,12 +91,34 @@ public class UserController {
         return true;
     }
 
+
+    //delete the user along with the post of that user
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteByEmail(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        User user = userRepository.findByEmail(email);
+        if(user == null){
+            return ResponseEntity.badRequest().body("user not found");
+        }
+
+        postRepository.deleteById(user.getId());
+        userRepository.delete(user);
+
+        
+
+        return ResponseEntity.ok("deleted");
+    }
+
+
+
     //delete any user individually by username.
     @DeleteMapping("/{userName}")
     public ResponseEntity<?> deletedByUserName(@PathVariable String userName){
         Optional<User> deleted = userService.deleteByUserName(userName);
 
-        if(deleted.isPresent()){
+        if(deleted.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

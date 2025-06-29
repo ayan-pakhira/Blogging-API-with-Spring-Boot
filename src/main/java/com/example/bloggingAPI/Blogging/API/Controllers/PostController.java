@@ -36,28 +36,31 @@ public class PostController {
     private PostRepository postRepository;
 
 
-    //creating the posts only for logged in users.
-    @PostMapping("/name/create-post/{userName}")
-    public ResponseEntity<Post> createEntry(@RequestBody Post post, @PathVariable String userName){
-        Optional<Post> saved = postService.saveEntry(post, userName);
+    //creating the posts only for login users.
+    @PostMapping("/name/create-post")
+    public ResponseEntity<Post> createEntry(@RequestBody Post post){
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Optional<Post> saved = postService.saveEntry(post, email);
 
         if(saved.isPresent()){
-            return new ResponseEntity<Post>(HttpStatus.CREATED);
+            return new ResponseEntity<>(HttpStatus.CREATED);
         }
 
-        return new ResponseEntity<Post>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
 
 
     //only for logged in users.
+    //to fetch the posts created by users
     @GetMapping("/name/{userName}")
-    public ResponseEntity<?> getPostByUserName(){
+    public ResponseEntity<?> getPostByUserName(@PathVariable String userName){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        //fetching the username from the authentication itself, means for authorization purpose when we will
-        //enter username and password, from there we will fetch the username through this process
-        String userName = authentication.getName();
-        User user = userService.findByUserName(userName);
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email);
+        User users = userRepository.findByUserName(userName);
 
         if(user == null){
             return new ResponseEntity<List<Post>>(HttpStatus.NOT_FOUND);
@@ -65,7 +68,7 @@ public class PostController {
 
         List<Post> all = user.getAllPosts();
 
-        if(userName.equals(user)){
+        if(all != null && users.equals(userName)){
 
                 return new ResponseEntity<>(all, HttpStatus.OK);
 
