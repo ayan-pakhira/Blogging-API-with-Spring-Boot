@@ -29,6 +29,9 @@ public class UserService {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private JwtService jwtService;
+
 
 
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -84,10 +87,16 @@ public class UserService {
         userRepository.deleteAll();
     }
 
-    public Optional<User> deleteByUserName(String userName){
-        User deleted = userRepository.deleteByUserName(userName);
-
-        return Optional.empty();
-    }
+//    public Optional<User> deleteByUserName(String userName){
+//        User deleted = userRepository.findByUserName(userName);
+//
+//        if(deleted == null){
+//            throw new RuntimeException("user not found");
+//        }
+//
+//
+//
+//        return Optional.empty();
+//    }
 
 }

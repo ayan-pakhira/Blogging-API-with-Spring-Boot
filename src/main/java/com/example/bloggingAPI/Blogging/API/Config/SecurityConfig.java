@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/api/**").hasRole("ADMIN") //to fetch all the users.
 
                         .requestMatchers("/post/name/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/post/like/**").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/post/**").permitAll()
                         .requestMatchers("/public/all-post/**").permitAll()
                         .requestMatchers("/notification/**").hasAnyRole("ADMIN", "USER")

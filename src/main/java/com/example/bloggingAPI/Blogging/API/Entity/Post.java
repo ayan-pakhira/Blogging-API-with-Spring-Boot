@@ -31,4 +31,7 @@ public class Post {
     @DBRef
     private List<Comments> allComments = new ArrayList<>();
 
+    private int likeCount = 0;
+    private Set<ObjectId> likedUserIds = new HashSet<>();
+
 }

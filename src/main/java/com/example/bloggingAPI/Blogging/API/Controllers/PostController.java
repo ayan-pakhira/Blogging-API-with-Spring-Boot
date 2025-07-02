@@ -4,6 +4,7 @@ import com.example.bloggingAPI.Blogging.API.Entity.Post;
 import com.example.bloggingAPI.Blogging.API.Entity.User;
 import com.example.bloggingAPI.Blogging.API.Repository.PostRepository;
 import com.example.bloggingAPI.Blogging.API.Repository.UserRepository;
+import com.example.bloggingAPI.Blogging.API.Service.JwtService;
 import com.example.bloggingAPI.Blogging.API.Service.PostService;
 import com.example.bloggingAPI.Blogging.API.Service.UserService;
 import org.bson.types.ObjectId;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/post")
@@ -34,6 +34,9 @@ public class PostController {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private JwtService jwtService;
 
 
     //creating the posts only for login users.
@@ -56,24 +59,21 @@ public class PostController {
     //only for logged in users.
     //to fetch the posts created by users
     @GetMapping("/name/{userName}")
-    public ResponseEntity<?> getPostByUserName(@PathVariable String userName){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email);
-        User users = userRepository.findByUserName(userName);
+    public ResponseEntity<?> getPostByUserName(@PathVariable String userName,
+                                               @RequestHeader("Authorization") String authHeader){
 
-        if(user == null){
-            return new ResponseEntity<List<Post>>(HttpStatus.NOT_FOUND);
+        ObjectId userId = jwtService.extractUserId(authHeader);
+        Optional<User> loggedInUser = Optional.ofNullable(userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("user not found")));
+
+        if(!loggedInUser.get().getUserName().equals(userName)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("user is invalid");
         }
 
-        List<Post> all = user.getAllPosts();
+        List<Post> posts = postRepository.findByUserId(userId);
 
-        if(all != null && users.equals(userName)){
+        return ResponseEntity.ok(posts);
 
-                return new ResponseEntity<>(all, HttpStatus.OK);
-
-        }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
 
@@ -102,22 +102,7 @@ public class PostController {
     }
 
 
-//    @PutMapping("/id/{userName}/{id}")
-//    public ResponseEntity<?> updatePostById(
-//            @PathVariable ObjectId id,
-//            @PathVariable Post newPost,
-//            @PathVariable String userName
-//    ){
-//        Post oldPost = postService.getById(id).orElse(null);
-//        if(oldPost != null){
-//            oldPost.setTitle(newPost.getTitle() != null && !newPost.getTitle().equals("") ? newPost.getTitle() : oldPost.getTitle());
-//            oldPost.setContent((newPost.getContent() != null && !newPost.getContent().equals("") ? newPost.getContent() : oldPost.getContent()));
-//            postService.saveEntry(oldPost);
-//            return new ResponseEntity<>(oldPost, HttpStatus.OK);
-//        }
-//
-//        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//    }
+
 
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -133,6 +118,33 @@ public class PostController {
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+   }
+
+
+   //liking a post by user
+   @PutMapping("/like/{userName}/{title}")
+   public Object postLikedByUser(@PathVariable String userName,
+                                 @PathVariable String title,
+                                 @RequestHeader("Authorization") String authHeader){
+        ObjectId userId = jwtService.extractUserId(authHeader);
+        User loggedInUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("user not found"));
+
+        if(!loggedInUser.getUserName().equals(userName)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("user is invalid");
+        }
+
+        Optional<Post> post = Optional.ofNullable(postRepository.findByTitle(title));
+
+        if(post.get().getLikedUserIds().contains(userId)){
+            return ResponseEntity.badRequest().body("you already liked the post");
+        }
+
+       post.get().setLikeCount(post.get().getLikeCount() + 1);
+       post.get().getLikedUserIds().add(userId);
+        postService.saveUserEntry(post.orElse(null));
+
+        return ResponseEntity.ok("post liked!!, total likes: " + post.get().getLikeCount());
    }
 
 

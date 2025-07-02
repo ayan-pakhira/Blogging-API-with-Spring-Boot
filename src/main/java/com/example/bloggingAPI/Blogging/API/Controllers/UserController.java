@@ -1,10 +1,13 @@
 package com.example.bloggingAPI.Blogging.API.Controllers;
+import com.example.bloggingAPI.Blogging.API.Entity.Post;
 import com.example.bloggingAPI.Blogging.API.Entity.User;
 import com.example.bloggingAPI.Blogging.API.Models.UserPrincipal;
 import com.example.bloggingAPI.Blogging.API.Repository.PostRepository;
 import com.example.bloggingAPI.Blogging.API.Repository.UserRepository;
+import com.example.bloggingAPI.Blogging.API.Service.JwtService;
 import com.example.bloggingAPI.Blogging.API.Service.PostService;
 import com.example.bloggingAPI.Blogging.API.Service.UserService;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +37,8 @@ public class UserController {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private JwtService jwtService;
 
 
     //for registering the user
@@ -92,37 +97,27 @@ public class UserController {
     }
 
 
-    //delete the user along with the post of that user
-    @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteByEmail(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
+    //delete the posts along with the users
+    @DeleteMapping("/delete/{userName}")
+    public ResponseEntity<?> deletePostsWithUser(@PathVariable String userName,
+                                                 @RequestHeader("Authorization") String authHeader){
 
-        User user = userRepository.findByEmail(email);
-        if(user == null){
-            return ResponseEntity.badRequest().body("user not found");
+        ObjectId userId = jwtService.extractUserId(authHeader);
+        User loggedInUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("user not found"));
+
+        if(!loggedInUser.getUserName().equals(userName)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("user is invalid");
         }
 
-        postRepository.deleteById(user.getId());
-        userRepository.delete(user);
+        List<Post> posts = postRepository.findByUserId(userId);
 
-        
+        userRepository.delete(loggedInUser);
+        postRepository.deleteAll(posts);
 
-        return ResponseEntity.ok("deleted");
+        return ResponseEntity.ok("deleted!!");
     }
 
-
-
-    //delete any user individually by username.
-    @DeleteMapping("/{userName}")
-    public ResponseEntity<?> deletedByUserName(@PathVariable String userName){
-        Optional<User> deleted = userService.deleteByUserName(userName);
-
-        if(deleted.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
 
 
 
